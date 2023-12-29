@@ -25,4 +25,4 @@ jobs:
       - name: Run Terraform Plan
         run: tflocal plan
       - name: Run Terraform Apply
-        run: tflocal apply
+        run: tflocal apply -auto-approve
