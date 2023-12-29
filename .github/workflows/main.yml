@@ -1,8 +1,8 @@
-name: learn-github-actions
-run-name: ${{ github.actor }} is learning GitHub Actions
+name: terraform-localstack
+run-name: Terraform Localstack Testing
 on: [push]
 jobs:
-  test-terraform-configuration:
+  terraform-localstack-configuration:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,9 +19,7 @@ jobs:
           pip install localstack
           docker pull localstack/localstack
           localstack start -d
-          echo "Waiting for LocalStack startup..."
           localstack wait -t 30
-          echo "Startup complete" 
       - name: Initialize the Terraform Configuration
         run: tflocal init
       - name: Validate Terraform Configuration
