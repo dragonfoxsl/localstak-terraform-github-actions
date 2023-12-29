@@ -1,20 +1,32 @@
-name: localstack-action-example
-on: push
+name: learn-github-actions
+run-name: ${{ github.actor }} is learning GitHub Actions
+on: [push]
 jobs:
-  example-job:
+  test-terraform-configuration:
     runs-on: ubuntu-latest
     steps:
-      - name: Start LocalStack
+      - uses: actions/checkout@v4
+      - name: Install Terraform
         run: |
-          pip install localstack awscli-local[ver1] # install LocalStack cli and awslocal
-          docker pull localstack/localstack         # Make sure to pull the latest version of the image
-          localstack start -d                       # Start LocalStack in the background
-
-          echo "Waiting for LocalStack startup..."  # Wait 30 seconds for the LocalStack container
-          localstack wait -t 30                     # to become ready before timing out
-          echo "Startup complete"          
-      - name: Run some Tests against LocalStack
+          wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt update
+          sudo apt install terraform
+      - name: Install tflocal
+        run: pip install terraform-local
+      - name: Install LocalStack
         run: |
-          awslocal s3 mb s3://test
-          awslocal s3 ls
-          echo "Test Execution complete!"  
+          pip install localstack
+          docker pull localstack/localstack
+          localstack start -d
+          echo "Waiting for LocalStack startup..."
+          localstack wait -t 30
+          echo "Startup complete" 
+      - name: Initialize the Terraform Configuration
+        run: tflocal init
+      - name: Validate Terraform Configuration
+        run: tflocal validate
+      - name: Run Terraform Plan
+        run: tflocal plan
+      - name: Run Terraform Apply
+        run: tflocal apply -auto-approve
